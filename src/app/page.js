@@ -1,113 +1,190 @@
-import Image from "next/image";
+// pages/index.js
+"use client";
+import Head from "next/head";
+import Link from "next/link";
+import { useState, useEffect } from "react";
+import BlogForm from "./components/BlogForm";
 
-export default function Home() {
+const Home = () => {
+  const [blogs, setBlogs] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+
+  useEffect(() => {
+    fetch("http://localhost:5001/api/blogs")
+      .then((response) => response.json())
+      .then((data) => setBlogs(data));
+  }, []);
+
+  const handleNewBlog = async (newBlog) => {
+    const response = await fetch("http://localhost:5001/api/blogs", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newBlog),
+    });
+
+    if (response.ok) {
+      const blog = await response.json();
+      setBlogs([...blogs, blog]);
+      setShowModal(false); // Close the modal after adding a new blog
+    }
+  };
+
+  const openModal = () => {
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+  };
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.js</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <div className="bg-white">
+      <Head className="font-black">
+        <title>My Blog App</title>
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+
+      <main className="px-10">
+        <div className="flex flex-row justify-between p-4 py-8">
+          <p className={`text-3xl font-bold text-sky-950`}>Ziffi Blogs</p>
+          {showModal && (
+            <div className="fixed inset-0 z-50 flex items-center bg-zinc-400/60 justify-center overflow-x-hidden overflow-y-auto outline-none focus:outline-none">
+              <div className="relative w-11/12 md:w-2/3 max-w-3xl mx-auto my-6">
+                <div className="relative flex flex-col w-full bg-white border-0 rounded-lg shadow-lg outline-none focus:outline-none">
+                  <div className="flex items-start justify-between p-5 border-b border-solid border-blueGray-200 rounded-t">
+                    <h3 className="text-3xl text-sky-950 font-semibold">Add New Blog</h3>
+                    <button
+                      className="p-1 ml-auto bg-transparent border-0 text-black float-right text-3xl leading-none font-semibold outline-none focus:outline-none"
+                      onClick={closeModal}
+                    >
+                      <span className="bg-transparent text-black h-6 w-6 text-2xl block outline-none focus:outline-none">
+                        ×
+                      </span>
+                    </button>
+                  </div>
+                  <div className="relative p-6 flex-auto">
+                    <BlogForm onSubmit={handleNewBlog} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-      </div>
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-full sm:before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full sm:after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+            <div
+              onClick={openModal}
+              className="w-[100px] h-[100px] z-50 p-4 transition duration-300 ease-in-out transform hover:scale-105 cursor-pointer m-4 bg-white rounded-full border-sky-950 border-2 text-center flex flex-col justify-center items-center hover:bg-sky-50 hover:pointer fixed bottom-10 right-10"
+            >
+              <div className={`text-5xl font-bold text-sky-950`}>+</div>
+            </div>
 
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800 hover:dark:bg-opacity-30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50 text-balance`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+        <div className="flex flex-wrap">
+          {data.map((blog, index) => (
+            <div
+              className="w-full sm:w-[45%] md:w-[28%] p-4 m-4 bg-sky-300/50 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 rounded hover:bg-sky-500/65"
+              key={blog.id}
+            >
+              <Link href={`/blog/${blog.id}`}>
+                <div className="flex flex-col justify-between">
+                  <div>
+                    <h2 className={`text-lg font-bold text-sky-950`}>
+                      {blog.title}  
+                    </h2>
+                    <p className={`text-sm text-black`}>
+                      {blog.content.substring(0, 100)}...
+                    </p>
+                  </div>
+                  <p className={`text-sm mt-4 text-black`}>By {blog.author}</p>
+                </div>
+              </Link>
+            </div>
+          ))}
+        </div>
+      </main>
+    </div>
   );
-}
+};
+
+export default Home;
+
+const data = [
+  {
+    id: "1",
+    title: "10 Tips for Better Time Management",
+    author: "Jane Smith",
+    content:
+      "Managing your time effectively is crucial for productivity and success. Here are 10 tips to help you improve your time management skills...",
+  },
+  {
+    id: "2",
+    title: "The Benefits of Regular Exercise",
+    author: "John Doe",
+    content:
+      "Regular exercise offers numerous benefits for both physical and mental health. From improving cardiovascular health to reducing stress levels, here's why you should prioritize exercise...",
+  },
+  {
+    id: "3",
+    title: "Beginner's Guide to Cooking Healthy Meals",
+    author: "Emily Johnson",
+    content:
+      "Cooking healthy meals at home doesn't have to be complicated. In this beginner's guide, we'll cover basic cooking techniques and healthy ingredient choices to get you started on the right track...",
+  },
+  {
+    id: "4",
+    title: "Exploring the Wonders of Nature",
+    author: "David Wilson",
+    content:
+      "Nature has a way of captivating us with its beauty and diversity. Join us on a journey to explore some of the most breathtaking natural wonders around the world...",
+  },
+  {
+    id: "5",
+    title: "Mastering the Art of Public Speaking",
+    author: "Sarah Thompson",
+    content:
+      "Public speaking is a valuable skill that can open doors to numerous opportunities. Whether you're giving a presentation at work or speaking at a social event, mastering the art of public speaking is essential...",
+  },
+  {
+    id: "6",
+    title: "The Importance of Setting Goals",
+    author: "Michael Brown",
+    content:
+      "Setting goals gives you direction, focus, and motivation to achieve your dreams. Learn why goal setting is important and how you can set effective goals to turn your aspirations into reality...",
+  },
+  {
+    id: "7",
+    title: "Exploring World Cuisines: A Culinary Adventure",
+    author: "Sophia Martinez",
+    content:
+      "Embark on a culinary adventure as we explore the rich and diverse world cuisines. From spicy curries to savory pastas, there's something for everyone to enjoy...",
+  },
+  {
+    id: "8",
+    title: "The Power of Positive Thinking",
+    author: "Adam Jones",
+    content:
+      "Positive thinking can have a profound impact on your life, leading to increased happiness, resilience, and success. Discover how you can cultivate a positive mindset and reap its benefits...",
+  },
+  {
+    id: "9",
+    title: "Exploring Mindfulness Meditation",
+    author: "Emma White",
+    content:
+      "Mindfulness meditation is a powerful practice that can help reduce stress, improve focus, and promote overall well-being. Learn how to incorporate mindfulness into your daily routine and experience its transformative effects...",
+  },
+  {
+    id: "10",
+    title: "Unlocking the Secrets of Successful Entrepreneurs",
+    author: "Jack Johnson",
+    content:
+      "What sets successful entrepreneurs apart from the rest? Join us as we delve into the habits, mindset, and strategies of some of the world's most successful business leaders...",
+  },
+  {
+    id: "11",
+    title: "The Art of Minimalism: Living with Less",
+    author: "Olivia Davis",
+    content:
+      "Minimalism is more than just decluttering your physical space – it's a way of life that promotes simplicity, intentionality, and freedom. Discover the joys of living with less and embrace a minimalist lifestyle...",
+  },
+];
